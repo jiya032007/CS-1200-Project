@@ -1,25 +1,25 @@
-import React, { useState } from 'react';
-import { useFonts } from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
+import { useFonts } from 'expo-font';
+import { useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  StatusBar,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-  Image, // added missing import
+  View
 } from 'react-native';
 
 
 export default function App() {
   const [fontsLoaded] = useFonts({
     MoiraiOne: require('./assets/fonts/MoiraiOne-Regular.ttf'),
+    MochiyPopOne: require('./assets/fonts/MochiyPopOne-Regular.ttf'), 
   });
 
 
@@ -53,7 +53,7 @@ export default function App() {
     }, 3000);
   };
 
-
+//app name at the top
   if (!fontsLoaded) {
     return (
       <View style={styles.loadingScreen}>
@@ -448,13 +448,14 @@ const styles = StyleSheet.create({
   color: '#2A6AFF', // same color as main text
 },
   sessionCode: {
-    marginTop: 10,
-    marginBottom: 20,
-    fontSize: 16,
-    color: '#A1CAFF',
-    fontWeight: '600',
-    alignSelf: 'center',
-  },
+  marginTop: 10,
+  marginBottom: 20,
+  fontSize: 16,
+  color: '#A1CAFF',
+  fontWeight: '600',
+  alignSelf: 'center',
+  fontFamily: 'MochiyPopOne',
+},
   inputContainer: {
     backgroundColor: '#1E5AE6',
     borderRadius: 20,
@@ -465,6 +466,7 @@ const styles = StyleSheet.create({
     color: '#A1CAFF',
     fontWeight: '600',
     marginBottom: 10,
+    fontFamily: 'MochiyPopOne',
     fontSize: 16,
     textAlign: 'center',
   },
@@ -472,6 +474,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#A1CAFF',
     padding: 12,
     borderRadius: 15,
+    fontFamily: 'MochiyPopOne',
     fontSize: 16,
     textAlign: 'center',
     color: '#000',
@@ -486,6 +489,7 @@ const styles = StyleSheet.create({
   joinButtonText: {
     color: '#2A6AFF',
     fontSize: 18,
+    fontFamily: 'MochiyPopOne',
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -530,6 +534,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#A1CAFF',
     textAlign: 'center',
+    fontFamily: 'MochiyPopOne',
     fontWeight: '600',
   },
   categoryScroll: {
@@ -547,6 +552,7 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     color: '#A1CAFF',
+    fontFamily: 'MochiyPopOne',
     fontWeight: '600',
   },
   dropdownScroll: {
@@ -565,6 +571,7 @@ const styles = StyleSheet.create({
   dropdownText: {
     color: '#000',
     textAlign: 'center',
+    fontFamily: 'MochiyPopOne',
     fontWeight: '600',
   },
   categoryIconWrap: {
@@ -588,6 +595,7 @@ categoryIcon: {
 categoryLabel: {
   color: '#A1CAFF',
   fontSize: 12,
+  fontFamily: 'MochiyPopOne',
   fontWeight: '600',
   textAlign: 'center',
 },
