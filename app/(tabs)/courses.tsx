@@ -4,11 +4,11 @@ import { StyleSheet } from 'react-native';
 import { ThemedText } from '../../components/themed-text';
 import { ThemedView } from '../../components/themed-view';
 
-export default function HomeScreen() {
+export default function CoursesScreen() {
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title">Home</ThemedText>
-      {/* Placeholder for schedule */}
+      <ThemedText type="title">Courses</ThemedText>
+      {/* Placeholder for course management */}
     </ThemedView>
   );
 }
