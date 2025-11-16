@@ -1,18 +1,42 @@
 
-import React from 'react';
-import { StyleSheet, TextInput, Button } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, TextInput, Button, Alert } from 'react-native';
 import { ThemedText } from '../../components/themed-text';
 import { ThemedView } from '../../components/themed-view';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../../firebase-config'; // Adjust the path as needed
 
 export default function ForgotPasswordScreen() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+
+  const handlePasswordReset = () => {
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        Alert.alert('Password Reset', 'A password reset link has been sent to your email.');
+        router.push('/(auth)');
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        Alert.alert('Error', errorMessage);
+      });
+  };
+
   return (
     <ThemedView style={styles.container}>
       <ThemedText type="title" style={styles.title}>FORGOT PASSWORD</ThemedText>
       <ThemedText style={styles.sessionCode}>Session code: CE23U1</ThemedText>
       <ThemedText style={styles.label}>Email:</ThemedText>
-      <TextInput style={styles.input} placeholder="Enter your username" />
-      <Button title="Send Code on Email" onPress={() => {}} color="#00FFFF" />
+      <TextInput 
+        style={styles.input} 
+        placeholder="Enter your email" 
+        value={email} 
+        onChangeText={setEmail} 
+        autoCapitalize="none" 
+      />
+      <Button title="Send Code on Email" onPress={handlePasswordReset} color="#00FFFF" />
       <Link href="/(auth)" style={styles.link}>back to login</Link>
     </ThemedView>
   );
