@@ -2,7 +2,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Modal, StyleSheet } from 'react-native';
 
-const AddCourseModal = ({ visible, onClose, onAdd }) => {
+interface AddCourseModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onAdd: (course: { name: string; code: string }) => void;
+}
+
+const AddCourseModal: React.FC<AddCourseModalProps> = ({ visible, onClose, onAdd }) => {
   const [courseName, setCourseName] = useState('');
   const [courseCode, setCourseCode] = useState('');
 
