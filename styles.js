@@ -233,18 +233,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   participantBubble: {
-  backgroundColor: '#A1CAFF',   // light background for participant cards
+  backgroundColor: '#A1CAFF',
   padding: 12,
   borderRadius: 12,
   marginVertical: 6,
   shadowColor: '#000',
   shadowOpacity: 0.1,
   shadowRadius: 3,
-  elevation: 2,                 // Android shadow
+  elevation: 2,
 },
 subTitle: {
   fontFamily: 'MoiraiOne',
-  fontSize: 45,        // smaller than your main title
+  fontSize: 45,
   fontWeight: '600',
   color: '#2A6AFF',
   textAlign: 'center',
@@ -257,21 +257,95 @@ participantText: {
   fontWeight: '500',
 },
   notificationBubble: {
-  backgroundColor: '#A1CAFF',   // light blue bubble
+  backgroundColor: '#A1CAFF',
   padding: 12,
   borderRadius: 12,
   marginVertical: 6,
   shadowColor: '#000',
   shadowOpacity: 0.1,
   shadowRadius: 3,
-  elevation: 2,                 // Android shadow
+  elevation: 2,
 },
 
 notificationText: {
   fontSize: 12,
   fontFamily: 'MochiyPopOne',
   color: '#001B58',
+},
+settingsBubble: {
+  backgroundColor: '#7BA3E8',
+  padding: 12,
+  borderRadius: 12,
+  marginVertical: 6,
+  shadowColor: '#000',
+  shadowOpacity: 0.1,
+  shadowRadius: 3,
+  elevation: 2,
+},
+settingsText: {
+  fontSize: 12,
+  color: '#FFFFFF',
+  fontFamily: 'MochiyPopOne',
+  fontWeight: '500',
 }
 });
 
 export default styles;
+
+function adjustBrightness(hexColor, percent) {
+  // Convert hex to RGB
+  const hex = hexColor.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  // Adjust brightness
+  const adjusted = [r, g, b].map(val => {
+    const newVal = Math.round(val + (255 - val) * (percent / 100));
+    return Math.min(255, Math.max(0, newVal));
+  });
+
+  // Convert back to hex
+  return '#' + adjusted.map(val => val.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
+export function themedStyles(theme) {
+  return {
+    safeArea: { backgroundColor: theme.backgroundColor },
+    scrollContainer: { backgroundColor: theme.backgroundColor },
+    titleContainer: { backgroundColor: theme.primary },
+    inputContainer: { backgroundColor: theme.primary },
+    inputContainerSmall: { backgroundColor: theme.primary },
+    labelStrip: { backgroundColor: theme.primary, color: theme.textColor },
+    input: { color: theme.textColor, backgroundColor: theme.backgroundColor },
+    inputCode: { color: theme.textColor, backgroundColor: theme.backgroundColor },
+    joinButton: { backgroundColor: theme.primary },
+    joinButtonText: { color: theme.textColor },
+    dropdownItem: { backgroundColor: theme.primary },
+    dropdownText: { color: theme.textColor },
+    participantBubble: { backgroundColor: theme.primary },
+    participantText: { color: theme.textColor },
+    notificationBubble: { backgroundColor: theme.primary },
+    notificationText: { color: theme.textColor },
+    categoryButton: { backgroundColor: theme.primary },
+    categoryText: { color: theme.textColor },
+    waitingContainer: { backgroundColor: theme.primary },
+    waitingText: { color: theme.textColor },
+    sessionCode: { color: theme.textColor },
+    label: { color: theme.textColor },
+    subTitle: { color: theme.textColor },
+    title: { color: theme.textColor },
+    participantBubble: { 
+      backgroundColor: adjustBrightness(theme.primary, 50),
+    },
+    participantText: { color: theme.textColor },
+    notificationBubble: { 
+      backgroundColor: adjustBrightness(theme.primary, 50),
+    },
+    notificationText: { color: theme.textColor },
+    settingsBubble: { 
+      backgroundColor: adjustBrightness(theme.primary, 50),
+    },
+    settingsText: { color: theme.textColor },
+  };
+}
