@@ -1,22 +1,32 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, Pressable } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
+import { auth } from '@/config/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
 
 export default function ProfileScreen() {
-  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
 
-  const handleLogout = () => {
-    // Implement your logout logic here
-    router.replace('/login'); // Redirect to login screen after logout
-  };
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   return (
     <ScrollView style={styles.container}>
       <ThemedView style={styles.content}>
         <ThemedText type="title" style={styles.title}>Profile</ThemedText>
+
+        {user && (
+          <ThemedView style={styles.row}>
+            <ThemedText style={styles.rowLabel}>Email</ThemedText>
+            <ThemedText style={styles.rowValue}>{user.email}</ThemedText>
+          </ThemedView>
+        )}
 
         <Link href="/settings" asChild>
           <Pressable style={styles.row}>
@@ -24,10 +34,6 @@ export default function ProfileScreen() {
             <ThemedText style={styles.rowValue}>〉</ThemedText>
           </Pressable>
         </Link>
-
-        <Pressable style={styles.logoutButton} onPress={handleLogout}>
-          <ThemedText style={styles.logoutButtonText}>Log Out</ThemedText>
-        </Pressable>
 
       </ThemedView>
     </ScrollView>
@@ -65,17 +71,5 @@ const styles = StyleSheet.create({
   rowValue: {
     color: '#a9a9a9',
     fontSize: 16,
-  },
-  logoutButton: {
-    backgroundColor: '#ef4444',
-    paddingVertical: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  logoutButtonText: {
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: 'bold',
   },
 });

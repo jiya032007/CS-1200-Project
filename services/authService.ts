@@ -23,16 +23,18 @@ export const signUp = async (email: string, password: string): Promise<AuthResul
     const userCredential: UserCredential = await createUserWithEmailAndPassword(auth, email, password);
     return { success: true, user: userCredential.user };
   } catch (error: any) {
-    return { success: false, error: error.message };
+    // Return the specific error code to be handled by the UI
+    return { success: false, error: error.code };
   }
 };
 
-export const signIn = async (email: string, password: string): Promise<AuthResult> => {
+export const signIn = async (email: string, password:string): Promise<AuthResult> => {
   try {
     const userCredential: UserCredential = await signInWithEmailAndPassword(auth, email, password);
     return { success: true, user: userCredential.user };
   } catch (error: any) {
-    return { success: false, error: error.message };
+    // Return the specific error code to be handled by the UI
+    return { success: false, error: error.code };
   }
 };
 
@@ -41,7 +43,7 @@ export const resetPassword = async (email: string): Promise<ResetPasswordResult>
     await sendPasswordResetEmail(auth, email);
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message };
+    return { success: false, error: error.code };
   }
 };
 
@@ -50,6 +52,6 @@ export const logout = async (): Promise<ResetPasswordResult> => {
     await signOut(auth);
     return { success: true };
   } catch (error: any) {
-    return { success: false, error: error.message };
+    return { success: false, error: error.code };
   }
 };

@@ -1,115 +1,153 @@
 
-import React, { useState } from 'react';
-import { StyleSheet, ScrollView, View, Pressable, Switch } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { StyleSheet, Pressable, Alert, Switch, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useRouter } from 'expo-router';
+import { logout } from '@/services/authService';
+import { ThemeContext } from './_layout';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const [pushNotifications, setPushNotifications] = useState(true);
-  const [emailNotifications, setEmailNotifications] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const { colorScheme, setColorScheme } = useContext(ThemeContext);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
-  const handleLogout = () => {
-    // Implement your logout logic here
-    router.replace('/login'); // Redirect to login screen after logout
+  const handleLogout = async () => {
+    const result = await logout();
+    if (result.success) {
+      router.replace('/(auth)/login');
+    } else {
+      Alert.alert('Logout Failed', result.error || 'An unexpected error occurred.');
+    }
   };
 
+  const handleNavigate = (path: string) => {
+    router.push(path as any);
+  };
+
+  const toggleNotifications = () => {
+    setNotificationsEnabled(previousState => !previousState);
+  };
+
+  const isDarkMode = colorScheme === 'dark';
+
+  const toggleTheme = () => {
+    setColorScheme(isDarkMode ? 'light' : 'dark');
+  }
+
   return (
-    <ScrollView style={styles.container}>
-      <ThemedView style={styles.content}>
-        <ThemedText type="title" style={styles.title}>Settings</ThemedText>
+    <ThemedView style={[styles.container, isDarkMode ? styles.darkContainer : styles.lightContainer]}>
+      <ThemedText type='title' style={[styles.title, isDarkMode ? styles.darkTitle : styles.lightTitle]}>
+        Settings
+      </ThemedText>
 
-        {/* Account Section */}
-        <View style={styles.section}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>Account</ThemedText>
-          <Pressable style={styles.row}>
-            <ThemedText style={styles.rowLabel}>Edit Profile</ThemedText>
-            <ThemedText style={styles.rowValue}>〉</ThemedText>
-          </Pressable>
-          <Pressable style={styles.row}>
-            <ThemedText style={styles.rowLabel}>Change Password</ThemedText>
-            <ThemedText style={styles.rowValue}>〉</ThemedText>
-          </Pressable>
-        </View>
-
-        {/* Notifications Section */}
-        <View style={styles.section}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>Notifications</ThemedText>
-          <View style={styles.row}>
-            <ThemedText style={styles.rowLabel}>Push Notifications</ThemedText>
-            <Switch value={pushNotifications} onValueChange={setPushNotifications} />
-          </View>
-          <View style={styles.row}>
-            <ThemedText style={styles.rowLabel}>Email Notifications</ThemedText>
-            <Switch value={emailNotifications} onValueChange={setEmailNotifications} />
-          </View>
-        </View>
-
-        {/* Theme Section */}
-        <View style={styles.section}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>Theme</ThemedText>
-          <View style={styles.row}>
-            <ThemedText style={styles.rowLabel}>Dark Mode</ThemedText>
-            <Switch value={isDarkMode} onValueChange={setIsDarkMode} />
-          </View>
-          <View style={styles.row}>
-            <ThemedText style={styles.rowLabel}>Light Mode</ThemedText>
-            <Switch value={!isDarkMode} onValueChange={() => setIsDarkMode(!isDarkMode)} />
-          </View>
-        </View>
-
-        {/* Logout Button */}
-        <Pressable style={styles.logoutButton} onPress={handleLogout}>
-          <ThemedText style={styles.logoutButtonText}>Log Out</ThemedText>
+      {/* Account Section */}
+      <ThemedView style={[styles.section, isDarkMode ? styles.darkSection : styles.lightSection]}>
+        <ThemedText style={[styles.sectionTitle, isDarkMode ? styles.darkSectionTitle : styles.lightSectionTitle]}>Account</ThemedText>
+        <Pressable style={styles.button} onPress={() => handleNavigate('/(tabs)/profile')}>
+          <ThemedText style={styles.buttonText}>Edit Profile</ThemedText>
         </Pressable>
-
+        <Pressable style={styles.button} onPress={() => handleNavigate('/change-password')}>
+          <ThemedText style={styles.buttonText}>Change Password</ThemedText>
+        </Pressable>
       </ThemedView>
-    </ScrollView>
+
+      {/* General Section */}
+      <ThemedView style={[styles.section, isDarkMode ? styles.darkSection : styles.lightSection]}>
+        <ThemedText style={[styles.sectionTitle, isDarkMode ? styles.darkSectionTitle : styles.lightSectionTitle]}>General</ThemedText>
+        <View style={styles.switchRow}>
+          <ThemedText style={[styles.switchLabel, isDarkMode ? styles.darkTitle : styles.lightTitle]}>Dark Mode</ThemedText>
+          <Switch
+            trackColor={{ false: '#767577', true: '#81b0ff' }}
+            thumbColor={isDarkMode ? '#f5dd4b' : '#f4f3f4'}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleTheme}
+            value={isDarkMode}
+          />
+        </View>
+        <View style={styles.switchRow}>
+          <ThemedText style={[styles.switchLabel, isDarkMode ? styles.darkTitle : styles.lightTitle]}>Notifications</ThemedText>
+          <Switch
+            trackColor={{ false: '#767577', true: '#81b0ff' }}
+            thumbColor={notificationsEnabled ? '#f5dd4b' : '#f4f3f4'}
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleNotifications}
+            value={notificationsEnabled}
+          />
+        </View>
+        <Pressable style={styles.button} onPress={() => handleNavigate('/privacy-policy')}>
+          <ThemedText style={styles.buttonText}>Privacy Policy</ThemedText>
+        </Pressable>
+        <Pressable style={styles.button} onPress={() => handleNavigate('/terms-of-service')}>
+          <ThemedText style={styles.buttonText}>Terms of Service</ThemedText>
+        </Pressable>
+      </ThemedView>
+
+      {/* Logout Button */}
+      <Pressable style={styles.logoutButton} onPress={handleLogout}>
+        <ThemedText style={styles.logoutButtonText}>Log Out</ThemedText>
+      </Pressable>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a2e',
-  },
-  content: {
     padding: 20,
     paddingTop: 60,
+  },
+  lightContainer: {
+    backgroundColor: '#ffffff',
+  },
+  darkContainer: {
+    backgroundColor: '#1a1a2e',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 30,
+  },
+  lightTitle: {
+    color: '#000000',
+  },
+  darkTitle: {
     color: '#E6F4FE',
   },
   section: {
-    marginBottom: 30,
+    marginBottom: 20,
+    borderRadius: 10,
+    padding: 15,
+  },
+  lightSection: {
+    backgroundColor: '#f0f0f0',
+  },
+  darkSection: {
+    backgroundColor: '#2a2a3e',
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#E6F4FE',
     marginBottom: 15,
   },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+  lightSectionTitle: {
+    color: '#000000',
   },
-  rowLabel: {
+  darkSectionTitle: {
+    color: '#E6F4FE',
+  },
+  button: {
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    backgroundColor: '#5B9FFF',
+    marginBottom: 10,
+  },
+  buttonText: {
     color: '#ffffff',
     fontSize: 16,
-  },
-  rowValue: {
-    color: '#a9a9a9',
-    fontSize: 16,
+    fontWeight: 'bold',
   },
   logoutButton: {
     backgroundColor: '#ef4444',
@@ -122,5 +160,14 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  switchRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  switchLabel: {
+    fontSize: 16,
   },
 });
