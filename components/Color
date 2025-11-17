@@ -1,0 +1,9 @@
+export const Colors = {
+  background: "#02062F",
+  card: "#0B0F4A",
+  border: "#1A1F66",
+  text: "#FFFFFF",
+  neonBlue: "#4AAEFF",
+  neonRed: "#FF4A4A",
+  lightGray: "#D5D5D5",
+};

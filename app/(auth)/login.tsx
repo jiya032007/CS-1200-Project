@@ -9,32 +9,31 @@ import {
   StatusBar 
 } from 'react-native';
 import { router } from 'expo-router';
-import { resetPassword } from '@/services/authService';
+import { signIn } from '@/services/authService';
 import { generateSessionCode } from '@/utils/sessionCode';
 
-export default function ForgotPasswordScreen() {
+export default function LoginScreen() {
   const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [sessionCode, setSessionCode] = useState<string>('');
 
   useEffect(() => {
     setSessionCode(generateSessionCode());
   }, []);
 
-  const handleResetPassword = async (): Promise<void> => {
-    if (!email) {
-      Alert.alert('Error', 'Please enter your email');
+  const handleLogin = async (): Promise<void> => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password');
       return;
     }
 
-    const result = await resetPassword(email);
+    const result = await signIn(email, password);
     if (result.success) {
-      Alert.alert(
-        'Success', 
-        'Password reset email sent! Check your inbox.',
-        [{ text: 'OK', onPress: () => router.back() }]
-      );
+      Alert.alert('Success', 'Logged in successfully');
+      router.replace('/(tabs)');
     } else {
-      Alert.alert('Error', result.error || 'Reset password failed');
+      Alert.alert('Error', result.error || 'Login failed');
     }
   };
 
@@ -42,11 +41,11 @@ export default function ForgotPasswordScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       
-      <Text style={styles.title}>forgot password</Text>
+      <Text style={styles.title}>login</Text>
       <Text style={styles.sessionCode}>Session code: {sessionCode}</Text>
 
       <View style={styles.formContainer}>
-        <Text style={styles.label}>Email :</Text>
+        <Text style={styles.label}>Username/ Email</Text>
         <TextInput
           style={styles.input}
           placeholder="Enter your username"
@@ -57,12 +56,34 @@ export default function ForgotPasswordScreen() {
           keyboardType="email-address"
         />
 
-        <TouchableOpacity style={styles.sendButton} onPress={handleResetPassword}>
-          <Text style={styles.sendButtonText}>Send Code on Email</Text>
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          placeholderTextColor="#6B7FD7"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+
+        <TouchableOpacity 
+          style={styles.checkboxContainer}
+          onPress={() => setRememberMe(!rememberMe)}
+        >
+          <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]} />
+          <Text style={styles.checkboxLabel}>Remember me</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backToLogin}>back to login</Text>
+        <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
+          <Text style={styles.loginButtonText}>Login</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push('/(auth)/forgot-password')}>
+          <Text style={styles.forgotPassword}>Forgot Password</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
+          <Text style={styles.newAccount}>New account</Text>
         </TouchableOpacity>
       </View>
 
@@ -91,7 +112,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 38,
+    fontSize: 48,
     fontWeight: 'bold',
     color: '#5B9FFF',
     textAlign: 'center',
@@ -123,24 +144,47 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#3a3a6e',
   },
-  sendButton: {
-    backgroundColor: 'transparent',
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
     borderWidth: 2,
-    borderColor: '#5B9FFF',
+    borderColor: '#fff',
+    marginRight: 10,
+    borderRadius: 3,
+  },
+  checkboxChecked: {
+    backgroundColor: '#5B9FFF',
+  },
+  checkboxLabel: {
+    color: '#fff',
+  },
+  loginButton: {
+    backgroundColor: '#5B9FFF',
     borderRadius: 8,
     padding: 15,
-    marginTop: 10,
+    marginBottom: 15,
   },
-  sendButtonText: {
-    color: '#5B9FFF',
+  loginButtonText: {
+    color: '#fff',
     textAlign: 'center',
     fontSize: 16,
+    fontWeight: 'bold',
   },
-  backToLogin: {
+  forgotPassword: {
+    color: '#5B9FFF',
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+    marginBottom: 15,
+  },
+  newAccount: {
     color: '#fff',
     textAlign: 'center',
     textDecorationLine: 'underline',
-    marginTop: 20,
   },
   bottomNav: {
     position: 'absolute',

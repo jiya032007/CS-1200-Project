@@ -1,45 +1,36 @@
-
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: '#5B9FFF',
+        tabBarInactiveTintColor: '#9BA1A6',
+        tabBarStyle: {
+          backgroundColor: '#1a1a2e',
+        },
         headerShown: false,
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <span style={{ fontSize: 24 }}>🏠</span>,
         }}
       />
       <Tabs.Screen
-        name="courses"
+        name="explore"
         options={{
-          title: 'Courses',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'book' : 'book-outline'} color={color} />
-          ),
+          title: 'Explore',
+          tabBarIcon: ({ color }) => <span style={{ fontSize: 24 }}>🔍</span>,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <span style={{ fontSize: 24 }}>👤</span>,
         }}
       />
     </Tabs>
