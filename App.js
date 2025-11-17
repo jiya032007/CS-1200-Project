@@ -390,5 +390,3 @@ function TabBar({ setScreen }) {
   );
 }
 
-
-
