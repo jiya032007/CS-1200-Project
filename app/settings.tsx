@@ -1,15 +1,15 @@
 
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Pressable, Alert, Switch, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useRouter } from 'expo-router';
 import { logout } from '@/services/authService';
-import { ThemeContext } from './_layout';
+import { useTheme } from '../context/ThemeContext';
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { colorScheme, setColorScheme } = useContext(ThemeContext);
+  const { theme, setThemeName } = useTheme();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   const handleLogout = async () => {
@@ -29,21 +29,21 @@ export default function SettingsScreen() {
     setNotificationsEnabled(previousState => !previousState);
   };
 
-  const isDarkMode = colorScheme === 'dark';
+  const isDarkMode = theme.statusBarStyle === 'light-content';
 
   const toggleTheme = () => {
-    setColorScheme(isDarkMode ? 'light' : 'dark');
+    setThemeName(isDarkMode ? 'blue' : 'default');
   }
 
   return (
-    <ThemedView style={[styles.container, isDarkMode ? styles.darkContainer : styles.lightContainer]}>
-      <ThemedText type='title' style={[styles.title, isDarkMode ? styles.darkTitle : styles.lightTitle]}>
+    <ThemedView style={styles.container}>
+      <ThemedText type='title' style={styles.title}>
         Settings
       </ThemedText>
 
       {/* Account Section */}
-      <ThemedView style={[styles.section, isDarkMode ? styles.darkSection : styles.lightSection]}>
-        <ThemedText style={[styles.sectionTitle, isDarkMode ? styles.darkSectionTitle : styles.lightSectionTitle]}>Account</ThemedText>
+      <ThemedView style={styles.section}>
+        <ThemedText style={styles.sectionTitle}>Account</ThemedText>
         <Pressable style={styles.button} onPress={() => handleNavigate('/(tabs)/profile')}>
           <ThemedText style={styles.buttonText}>Edit Profile</ThemedText>
         </Pressable>
@@ -53,10 +53,10 @@ export default function SettingsScreen() {
       </ThemedView>
 
       {/* General Section */}
-      <ThemedView style={[styles.section, isDarkMode ? styles.darkSection : styles.lightSection]}>
-        <ThemedText style={[styles.sectionTitle, isDarkMode ? styles.darkSectionTitle : styles.lightSectionTitle]}>General</ThemedText>
+      <ThemedView style={styles.section}>
+        <ThemedText style={styles.sectionTitle}>General</ThemedText>
         <View style={styles.switchRow}>
-          <ThemedText style={[styles.switchLabel, isDarkMode ? styles.darkTitle : styles.lightTitle]}>Dark Mode</ThemedText>
+          <ThemedText style={styles.switchLabel}>Dark Mode</ThemedText>
           <Switch
             trackColor={{ false: '#767577', true: '#81b0ff' }}
             thumbColor={isDarkMode ? '#f5dd4b' : '#f4f3f4'}
@@ -66,7 +66,7 @@ export default function SettingsScreen() {
           />
         </View>
         <View style={styles.switchRow}>
-          <ThemedText style={[styles.switchLabel, isDarkMode ? styles.darkTitle : styles.lightTitle]}>Notifications</ThemedText>
+          <ThemedText style={styles.switchLabel}>Notifications</ThemedText>
           <Switch
             trackColor={{ false: '#767577', true: '#81b0ff' }}
             thumbColor={notificationsEnabled ? '#f5dd4b' : '#f4f3f4'}
@@ -97,45 +97,21 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,
   },
-  lightContainer: {
-    backgroundColor: '#ffffff',
-  },
-  darkContainer: {
-    backgroundColor: '#1a1a2e',
-  },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 30,
   },
-  lightTitle: {
-    color: '#000000',
-  },
-  darkTitle: {
-    color: '#E6F4FE',
-  },
   section: {
     marginBottom: 20,
     borderRadius: 10,
     padding: 15,
   },
-  lightSection: {
-    backgroundColor: '#f0f0f0',
-  },
-  darkSection: {
-    backgroundColor: '#2a2a3e',
-  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 15,
-  },
-  lightSectionTitle: {
-    color: '#000000',
-  },
-  darkSectionTitle: {
-    color: '#E6F4FE',
   },
   button: {
     paddingVertical: 15,

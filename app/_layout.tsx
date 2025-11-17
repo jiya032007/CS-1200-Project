@@ -1,38 +1,49 @@
 
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
-import { createContext, useState, useContext } from 'react';
-import { useColorScheme as useRNColorScheme } from 'react-native';
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-interface ThemeContextType {
-  colorScheme: 'light' | 'dark';
-  setColorScheme: (colorScheme: 'light' | 'dark') => void;
-}
+function Layout() {
+  const { theme } = useTheme();
 
-export const ThemeContext = createContext<ThemeContextType> ({
-  colorScheme: 'light',
-  setColorScheme: () => {},
-});
+  const isDark = theme.statusBarStyle === 'light-content';
 
-export default function RootLayout() {
-  const [colorScheme, setColorScheme] = useState<'light' | 'dark'>(useRNColorScheme() ?? 'light');
+  const navigationTheme = {
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
+      background: theme.backgroundColor,
+      text: theme.textColor,
+      primary: theme.primary,
+      card: theme.backgroundColor,
+    },
+  };
 
   return (
-    <ThemeContext.Provider value={{ colorScheme, setColorScheme }}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack initialRouteName="(auth)">
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          <Stack.Screen name="settings" options={{ title: 'Settings', headerBackTitle: 'Back' }} />
-          <Stack.Screen name="privacy-policy" options={{ title: 'Privacy Policy', headerBackTitle: 'Back' }} />
-          <Stack.Screen name="terms-of-service" options={{ title: 'Terms of Service', headerBackTitle: 'Back' }} />
-          <Stack.Screen name="notifications" options={{ title: 'Notifications', headerBackTitle: 'Back' }} />
-        </Stack>
-        <StatusBar style="auto" />
+    <NavigationThemeProvider value={navigationTheme}>
+      <Stack initialRouteName="(auth)">
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen name="settings" options={{ title: 'Settings', headerBackTitle: 'Back' }} />
+        <Stack.Screen name="privacy-policy" options={{ title: 'Privacy Policy', headerBackTitle: 'Back' }} />
+        <Stack.Screen name="terms-of-service" options={{ title: 'Terms of Service', headerBackTitle: 'Back' }} />
+        <Stack.Screen name="notifications" options={{ title: 'Notifications', headerBackTitle: 'Back' }} />
+      </Stack>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+    </NavigationThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <ThemeProvider>
+        <Layout />
       </ThemeProvider>
-    </ThemeContext.Provider>
+    </SafeAreaView>
   );
 }
