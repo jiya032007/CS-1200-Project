@@ -52,6 +52,10 @@ export default function SignupScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>{'<' + ' Back'}</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>NEW ACCOUNT</Text>
       <Text style={styles.sessionCode}>Session code: {sessionCode}</Text>
 
@@ -93,7 +97,7 @@ export default function SignupScreen() {
       </View>
 
       <View style={styles.bottomNav}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
           <Text style={styles.navIcon}>🏠</Text>
         </TouchableOpacity>
         <TouchableOpacity>
@@ -115,6 +119,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1a1a2e',
     padding: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+    zIndex: 1,
+  },
+  backButtonText: {
+    color: '#5B9FFF',
+    fontSize: 16,
   },
   title: {
     fontSize: 40,

@@ -1,33 +1,36 @@
+
 import React from 'react';
-import { StyleSheet, Button, View } from 'react-native';
+import { StyleSheet, ScrollView, Pressable } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/config/firebase';
-import { router } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      router.replace('/(auth)/login');
-    } catch (error: any) {
-      console.error('Sign out error:', error.message);
-    }
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // Implement your logout logic here
+    router.replace('/login'); // Redirect to login screen after logout
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.content}>
+    <ScrollView style={styles.container}>
+      <ThemedView style={styles.content}>
         <ThemedText type="title" style={styles.title}>Profile</ThemedText>
-        <ThemedText style={styles.email}>
-          {auth.currentUser?.email || 'No user logged in'}
-        </ThemedText>
-        <View style={styles.buttonContainer}>
-          <Button title="Sign Out" onPress={handleSignOut} color="#5B9FFF" />
-        </View>
-      </View>
-    </ThemedView>
+
+        <Link href="/settings" asChild>
+          <Pressable style={styles.row}>
+            <ThemedText style={styles.rowLabel}>Settings</ThemedText>
+            <ThemedText style={styles.rowValue}>〉</ThemedText>
+          </Pressable>
+        </Link>
+
+        <Pressable style={styles.logoutButton} onPress={handleLogout}>
+          <ThemedText style={styles.logoutButtonText}>Log Out</ThemedText>
+        </Pressable>
+
+      </ThemedView>
+    </ScrollView>
   );
 }
 
@@ -41,13 +44,38 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   title: {
-    marginBottom: 20,
-  },
-  email: {
-    fontSize: 16,
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 30,
+    color: '#E6F4FE',
   },
-  buttonContainer: {
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#334155',
+  },
+  rowLabel: {
+    color: '#ffffff',
+    fontSize: 16,
+  },
+  rowValue: {
+    color: '#a9a9a9',
+    fontSize: 16,
+  },
+  logoutButton: {
+    backgroundColor: '#ef4444',
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
     marginTop: 20,
+  },
+  logoutButtonText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
