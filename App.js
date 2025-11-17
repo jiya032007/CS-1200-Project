@@ -8,32 +8,33 @@ import {
   SafeAreaView,
   ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
+import styles from './styles';
 
 
 export default function App() {
   const [fontsLoaded] = useFonts({
     MoiraiOne: require('./assets/fonts/MoiraiOne-Regular.ttf'),
-    MochiyPopOne: require('./assets/fonts/MochiyPopOne-Regular.ttf'), 
+    MochiyPopOne: require('./assets/fonts/MochiyPopOne-Regular.ttf'),
   });
 
 
   const [joinCode, setJoinCode] = useState('');
-  const [screen, setScreen] = useState('join'); // 'join' | 'waiting' | 'home'
+  const [screen, setScreen] = useState('join'); // 'join' | 'waiting' | 'home' | 'aiWaiting' | 'aiResponse'
 
 
-  // Moved out of conditional so hooks are called unconditionally
   const [customQuestion, setCustomQuestion] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedQuestion, setSelectedQuestion] = useState('');
   const [submittedQuestion, setSubmittedQuestion] = useState('');
   const [aiAnswer, setAiAnswer] = useState('');
   const [responses, setResponses] = useState([]);
+
+
   const categories = ['School', 'Events', 'Sports', 'Food'];
   const questions = {
     School: ['What subject is hardest?', 'How do I study better?', 'Should I drop a class?'],
@@ -45,27 +46,24 @@ export default function App() {
 
   const handleJoin = () => {
     setScreen('waiting');
-
-
-    // Simulate admin starting session after 3 seconds
     setTimeout(() => {
       setScreen('home');
     }, 3000);
   };
 
-//app name at the top
+
   if (!fontsLoaded) {
     return (
       <View style={styles.loadingScreen}>
         <View style={{ position: 'relative' }}>
           <Text style={[styles.loadingTitle, styles.loadingOutline]}>AI Decision Maker</Text>
-          <Text style={styles.loadingTitle}>AI Decision Maker</Text>
         </View>
       </View>
     );
   }
 
 
+  // Waiting screen
   if (screen === 'waiting') {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -75,11 +73,8 @@ export default function App() {
             <View style={styles.titleContainer}>
               <View style={{ position: 'relative' }}>
                 <Text style={[styles.title, styles.titleOutline]}>AI Decision Maker</Text>
-                <Text style={styles.title}>AI Decision Maker</Text>
               </View>
             </View>
-
-
             <Text style={styles.sessionCode}>Session Code: {joinCode}</Text>
           </View>
 
@@ -102,6 +97,7 @@ export default function App() {
   }
 
 
+  // Home screen
   if (screen === 'home') {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -111,30 +107,28 @@ export default function App() {
             <View style={styles.titleContainer}>
               <View style={{ position: 'relative' }}>
                 <Text style={[styles.title, styles.titleOutline]}>AI Decision Maker</Text>
-                <Text style={styles.title}>AI Decision Maker</Text>
               </View>
             </View>
-
-
             <Text style={styles.sessionCode}>Session Code: {joinCode}</Text>
           </View>
 
 
-          {/* Custom Question Input */}
+          {/* Custom Question strip outside the input container */}
+          <Text style={[styles.labelStrip, { marginTop: -10 }]}>Custom Question:</Text>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Custom Question:</Text>
             <TextInput
               style={styles.input}
               value={customQuestion}
               onChangeText={setCustomQuestion}
               placeholder="Type your question"
               placeholderTextColor="#0b3597ff"
+              multiline={true}
             />
           </View>
 
 
           {/* Categories */}
-          <Text style={styles.label}>Choose a Category:</Text>
+          <Text style={styles.labelStrip}>Choose a Category:</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
             {categories.map((cat) => (
               <TouchableOpacity
@@ -143,7 +137,10 @@ export default function App() {
                   styles.categoryButton,
                   selectedCategory === cat && styles.categorySelected,
                 ]}
-                onPress={() => setSelectedCategory(cat)}
+                onPress={() => {
+                  setSelectedCategory(cat);
+                  setSelectedQuestion(''); // reset selected question when category changes
+                }}
               >
                 <Text style={styles.categoryText}>{cat}</Text>
               </TouchableOpacity>
@@ -153,86 +150,88 @@ export default function App() {
 
           {/* Pre-written Questions */}
           {selectedCategory && (
-            <View style={styles.inputContainer}>
+            <>
               <Text style={styles.label}>Pre-written Questions:</Text>
-              <ScrollView style={styles.dropdownScroll}>
-                {questions[selectedCategory].map((q) => (
-                  <TouchableOpacity
-                    key={q}
-                    style={[
-                      styles.dropdownItem,
-                      selectedQuestion === q && styles.dropdownSelected,
-                    ]}
-                    onPress={() => setSelectedQuestion(q)}
-                  >
-                    <Text style={styles.dropdownText}>{q}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
+              <View style={styles.inputContainer}>
+                <ScrollView style={styles.dropdownScroll}>
+                  {questions[selectedCategory].map((q) => (
+                    <TouchableOpacity
+                      key={q}
+                      style={[
+                        styles.dropdownItem,
+                        selectedQuestion === q && styles.dropdownSelected,
+                      ]}
+                      onPress={() => setSelectedQuestion(q)}
+                    >
+                      <Text style={styles.dropdownText}>{q}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </>
           )}
 
 
           {/* Submit Button */}
           <TouchableOpacity
-  style={styles.joinButton}
-  onPress={async () => {
-    const finalQuestion = customQuestion || selectedQuestion;
+            style={styles.joinButton}
+            onPress={async () => {
+              const finalQuestion = customQuestion || selectedQuestion;
 
 
-    if (!finalQuestion) {
-      alert('Please enter or select a question first!');
-      return;
-    }
+              if (!finalQuestion) {
+                alert('Please enter or select a question first!');
+                return;
+              }
 
 
-    setSubmittedQuestion(finalQuestion);
-    setScreen('aiWaiting');
+              setSubmittedQuestion(finalQuestion);
+              setScreen('aiWaiting');
 
 
-    try {
-  const res = await fetch(
-    "https://router.huggingface.co/hf-inference/gpt2",
-    {
-      method: "POST",
-      headers: {
-        "Authorization": "Bearer YOUR_HF_TOKEN_HERE",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ inputs: finalQuestion }),
-    }
-  );
+              try {
+                const res = await fetch(
+                  'https://router.huggingface.co/hf-inference/gpt2',
+                  {
+                    method: 'POST',
+                    headers: {
+                      Authorization: 'Bearer YOUR_HF_TOKEN_HERE',
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ inputs: finalQuestion }),
+                  }
+                );
 
 
-  const text = await res.text();
-  console.log("Raw Hugging Face response:", text);
+                const text = await res.text();
+                console.log('Raw Hugging Face response:', text);
 
 
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    throw new Error("Response was not JSON: " + text);
-  }
+                let data;
+                try {
+                  data = JSON.parse(text);
+                } catch {
+                  throw new Error('Response was not JSON: ' + text);
+                }
 
 
-  const aiText = Array.isArray(data)
-    ? data[0]?.generated_text
-    : data?.generated_text || "No answer returned.";
+                const aiText = Array.isArray(data)
+                  ? data[0]?.generated_text
+                  : data?.generated_text || 'No answer returned.';
 
 
-  setAiAnswer(aiText);
-  setResponses(prev => [...prev, { user: "AI", text: aiText }]);
-  setScreen("aiResponse");
-} catch (error) {
-  console.error("AI error:", error);
-  setAiAnswer("Sorry, I couldn't fetch an AI answer.");
-  setScreen("aiResponse");
-}
-  }}
->
-  <Text style={styles.joinButtonText}>Submit Question</Text>
-</TouchableOpacity>
+                setAiAnswer(aiText);
+                setResponses((prev) => [...prev, { user: 'AI', text: aiText }]);
+                setScreen('aiResponse');
+              } catch (error) {
+                console.error('AI error:', error);
+                setAiAnswer("Sorry, I couldn't fetch an AI answer.");
+                setScreen('aiResponse');
+              }
+            }}
+          >
+            <Text style={styles.joinButtonText}>Submit Question</Text>
+          </TouchableOpacity>
         </ScrollView>
 
 
@@ -245,360 +244,161 @@ export default function App() {
       </SafeAreaView>
     );
   }
-  //ai waiting screen
+
+
+  // AI waiting screen
   if (screen === 'aiWaiting') {
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#001B58" />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.headerWrap}>
-        <View style={styles.titleContainer}>
-          <View style={{ position: 'relative' }}>
-            <Text style={[styles.title, styles.titleOutline]}>AI Decision Maker</Text>
-            <Text style={styles.title}>AI Decision Maker</Text>
-          </View>
-        </View>
-
-
-        <Text style={styles.sessionCode}>Session Code: {joinCode}</Text>
-      </View>
-
-
-        <Text style={styles.waitingText}>Waiting for AI to respond…</Text>
-        <ActivityIndicator size="large" color="#2A6AFF" style={{ marginTop: 20 }} />
-      </ScrollView>
-
-
-      <View style={styles.tabBar}>
-        <Ionicons name="home-outline" size={24} color="#0077FF" />
-        <Ionicons name="people-outline" size={24} color="#0077FF" />
-        <Ionicons name="notifications-outline" size={24} color="#0077FF" />
-        <Ionicons name="menu-outline" size={24} color="#0077FF" />
-      </View>
-    </SafeAreaView>
-  );
-}
-
-//ai response screen
-if (screen === 'aiResponse') {
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#001B58" />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.headerWrap}>
-        <View style={styles.titleContainer}>
-          <View style={{ position: 'relative' }}>
-            <Text style={[styles.title, styles.titleOutline]}>AI Decision Maker</Text>
-            <Text style={styles.title}>AI Decision Maker</Text>
-          </View>
-        </View>
-
-
-        <Text style={styles.sessionCode}>Session Code: {joinCode}</Text>
-      </View>
-
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Your Submission:</Text>
-          <Text style={styles.dropdownText}>{submittedQuestion}</Text>
-        </View>
-
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>AI Response:</Text>
-          <Text style={styles.dropdownText}>
-            {aiAnswer || "Waiting for AI response..."}
-          </Text>
-        </View>
-                <View style={styles.inputContainer}>
-          <Text style={styles.label}>Other’s Responses:</Text>
-          {responses.length === 0 ? (
-            <Text style={styles.dropdownText}>No responses yet.</Text>
-          ) : (
-            responses.map((r, i) => (
-              <Text key={i} style={styles.dropdownText}>
-                {r.user}: {r.text}
-              </Text>
-            ))
-          )}
-        </View>
-
-
-        <TouchableOpacity
-          style={styles.joinButton}
-          onPress={() => {
-            setCustomQuestion('');
-            setSelectedCategory(null);
-            setSelectedQuestion('');
-            setSubmittedQuestion('');
-            setScreen('home');
-          }}
-        >
-          <Text style={styles.joinButtonText}>Ask Another Question</Text>
-        </TouchableOpacity>
-      </ScrollView>
-
-
-      <View style={styles.tabBar}>
-        <Ionicons name="home-outline" size={24} color="#0077FF" />
-        <Ionicons name="people-outline" size={24} color="#0077FF" />
-        <Ionicons name="notifications-outline" size={24} color="#0077FF" />
-        <Ionicons name="menu-outline" size={24} color="#0077FF" />
-      </View>
-    </SafeAreaView>
-  );
-}
-
-
-  // Join screen
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#001B58" />
-      <KeyboardAvoidingView
-        style={styles.keyboardWrapper}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <View style={styles.titleContainer}>
-            <View style={{ position: 'relative' }}>
-              <Text style={[styles.title, styles.titleOutline]}>AI Decision Maker</Text>
-              <Text style={styles.title}>AI Decision Maker</Text>
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="light-content" backgroundColor="#001B58" />
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.headerWrap}>
+            <View style={styles.titleContainer}>
+              <View style={{ position: 'relative' }}>
+                <Text style={[styles.title, styles.titleOutline]}>AI Decision Maker</Text>
+              </View>
             </View>
+            <Text style={styles.sessionCode}>Session Code: {joinCode}</Text>
           </View>
 
 
-          {/* Spacer to push the session code input lower on the join page */}
-          <View style={styles.joinSpacer} />
+          <Text style={styles.waitingText}>Waiting for AI to respond…</Text>
+          <ActivityIndicator size="large" color="#2A6AFF" style={{ marginTop: 20 }} />
+        </ScrollView>
+
+
+        <View style={styles.tabBar}>
+          <Ionicons name="home-outline" size={24} color="#0077FF" />
+          <Ionicons name="people-outline" size={24} color="#0077FF" />
+          <Ionicons name="notifications-outline" size={24} color="#0077FF" />
+          <Ionicons name="menu-outline" size={24} color="#0077FF" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+
+  // AI response screen
+  if (screen === 'aiResponse') {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="light-content" backgroundColor="#001B58" />
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.headerWrap}>
+            <View style={styles.titleContainer}>
+              <View style={{ position: 'relative' }}>
+                <Text style={[styles.title, styles.titleOutline]}>AI Decision Maker</Text>
+              </View>
+            </View>
+            <Text style={styles.sessionCode}>Session Code: {joinCode}</Text>
+          </View>
 
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Enter Session code:</Text>
-            <TextInput
-              style={styles.input}
-              value={joinCode}
-              onChangeText={setJoinCode}
-              placeholder="Enter code"
-              placeholderTextColor="#0b3597ff"
-            />
+            <Text style={styles.label}>Your Submission:</Text>
+            <Text style={styles.dropdownText}>{submittedQuestion}</Text>
           </View>
 
 
-          <TouchableOpacity style={styles.joinButton} onPress={handleJoin}>
-            <Text style={styles.joinButtonText}>Join Session</Text>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>AI Response:</Text>
+            <Text style={styles.dropdownText}>
+              {aiAnswer || 'Waiting for AI response...'}
+            </Text>
+          </View>
+
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Other’s Responses:</Text>
+            {responses.length === 0 ? (
+              <Text style={styles.dropdownText}>No responses yet.</Text>
+            ) : (
+              responses.map((r, i) => (
+                <Text key={i} style={styles.dropdownText}>
+                  {r.user}: {r.text}
+                </Text>
+              ))
+            )}
+          </View>
+
+
+          <TouchableOpacity
+            style={styles.joinButton}
+            onPress={() => {
+              setCustomQuestion('');
+              setSelectedCategory(null);
+              setSelectedQuestion('');
+              setSubmittedQuestion('');
+              setScreen('home');
+            }}
+          >
+            <Text style={styles.joinButtonText}>Ask Another Question</Text>
           </TouchableOpacity>
         </ScrollView>
-      </KeyboardAvoidingView>
 
 
-      <View style={styles.tabBar}>
-        <Ionicons name="home-outline" size={24} color="#0077FF" />
-        <Ionicons name="people-outline" size={24} color="#0077FF" />
-        <Ionicons name="notifications-outline" size={24} color="#0077FF" />
-        <Ionicons name="menu-outline" size={24} color="#0077FF" />
-      </View>
-    </SafeAreaView>
-  );
+        <View style={styles.tabBar}>
+          <Ionicons name="home-outline" size={24} color="#0077FF" />
+          <Ionicons name="people-outline" size={24} color="#0077FF" />
+          <Ionicons name="notifications-outline" size={24} color="#0077FF" />
+          <Ionicons name="menu-outline" size={24} color="#0077FF" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+
+  // Join screen
+  // Join screen
+return (
+  <SafeAreaView style={styles.safeArea}>
+    <StatusBar barStyle="light-content" backgroundColor="#001B58" />
+    <KeyboardAvoidingView
+      style={styles.keyboardWrapper}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.titleContainer}>
+          <View style={{ position: 'relative' }}>
+            <Text style={[styles.title, styles.titleOutline]}>AI Decision Maker</Text>
+          </View>
+        </View>
+
+        {/* Spacer to push the session code input lower on the join page */}
+        <View style={styles.joinSpacer} />
+
+        {/* Use the smaller container + input for session code */}
+        <View style={styles.inputContainerSmall}>
+          <Text style={styles.label}>Enter Session code:</Text>
+          <TextInput
+            style={styles.inputCode}
+            value={joinCode}
+            onChangeText={setJoinCode}
+            placeholder="Enter code"
+            placeholderTextColor="#0b3597ff"
+          />
+        </View>
+
+        <TouchableOpacity style={styles.joinButton} onPress={handleJoin}>
+          <Text style={styles.joinButtonText}>Join Session</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
+
+    <View style={styles.tabBar}>
+      <Ionicons name="home-outline" size={24} color="#0077FF" />
+      <Ionicons name="people-outline" size={24} color="#0077FF" />
+      <Ionicons name="notifications-outline" size={24} color="#0077FF" />
+      <Ionicons name="menu-outline" size={24} color="#0077FF" />
+    </View>
+  </SafeAreaView>
+);
 }
 
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#001B58',
-  },
-  keyboardWrapper: {
-    flex: 1,
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    backgroundColor: '#020111',
-    padding: 20,
-    paddingTop: 20,
-    paddingBottom: 40,
-  },
-  headerWrap: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  joinSpacer: {
-    height: 80, // reduced spacing to move session code input less far down
-  },
-  titleContainer: {
-    backgroundColor: '#0B1B3F',
-    borderRadius: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-    marginBottom: 0,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 50,
-    fontFamily: 'MoiraiOne',
-    color: '#2A6AFF',
-    textAlign: 'center',
-    textShadowColor: '#2A6AFF',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
-  },
-  titleOutline: {
-  position: 'absolute',
-  left: 0,
-  top: 0,
-  color: '#2A6AFF', // same color as main text
-},
-  sessionCode: {
-  marginTop: 10,
-  marginBottom: 20,
-  fontSize: 16,
-  color: '#A1CAFF',
-  fontWeight: '600',
-  alignSelf: 'center',
-  fontFamily: 'MochiyPopOne',
-},
-  inputContainer: {
-    backgroundColor: '#1E5AE6',
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 40,
-  },
-  label: {
-    color: '#A1CAFF',
-    fontWeight: '600',
-    marginBottom: 10,
-    fontFamily: 'MochiyPopOne',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  input: {
-    backgroundColor: '#A1CAFF',
-    padding: 12,
-    borderRadius: 15,
-    fontFamily: 'MochiyPopOne',
-    fontSize: 16,
-    textAlign: 'center',
-    color: '#000',
-  },
-  joinButton: {
-    backgroundColor: '#0B1B3F',
-    borderRadius: 20,
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    alignSelf: 'center',
-  },
-  joinButtonText: {
-    color: '#2A6AFF',
-    fontSize: 18,
-    fontFamily: 'MochiyPopOne',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  tabBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 15,
-    backgroundColor: '#001B58',
-    borderTopWidth: 1,
-    borderColor: '#333',
-  },
-  loadingScreen: {
-    flex: 1,
-    backgroundColor: '#020111',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  loadingTitle: {
-    fontSize: 50,
-    fontFamily: 'MoiraiOne',
-    color: '#2A6AFF',
-    textAlign: 'center',
-    textShadowColor: '#2A6AFF',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
-  },
-  loadingOutline: {
-    position: 'absolute',
-    left: 0.5,
-    top: 0.5,
-    color: '#000',
-  },
-  waitingContainer: {
-    backgroundColor: '#0B1B3F',
-    borderRadius: 20,
-    padding: 30,
-    marginHorizontal: 10,
-    alignItems: 'center',
-  },
-  waitingText: {
-    fontSize: 16,
-    color: '#A1CAFF',
-    textAlign: 'center',
-    fontFamily: 'MochiyPopOne',
-    fontWeight: '600',
-  },
-  categoryScroll: {
-    marginBottom: 20,
-  },
-  categoryButton: {
-    backgroundColor: '#1E5AE6',
-    borderRadius: 50,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginRight: 10,
-  },
-  categorySelected: {
-    backgroundColor: '#2A6AFF',
-  },
-  categoryText: {
-    color: '#A1CAFF',
-    fontFamily: 'MochiyPopOne',
-    fontWeight: '600',
-  },
-  dropdownScroll: {
-    maxHeight: 150,
-    marginTop: 10,
-  },
-  dropdownItem: {
-    padding: 10,
-    backgroundColor: '#A1CAFF',
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  dropdownSelected: {
-    backgroundColor: '#2A6AFF',
-  },
-  dropdownText: {
-    color: '#000',
-    textAlign: 'center',
-    fontFamily: 'MochiyPopOne',
-    fontWeight: '600',
-  },
-  categoryIconWrap: {
-  alignItems: 'center',
-  marginRight: 15,
-},
-categoryCircle: {
-  width: 60,
-  height: 60,
-  borderRadius: 30,
-  backgroundColor: '#1E5AE6',
-  justifyContent: 'center',
-  alignItems: 'center',
-  marginBottom: 5,
-},
-categoryIcon: {
-  width: 30,
-  height: 30,
-  resizeMode: 'contain',
-},
-categoryLabel: {
-  color: '#A1CAFF',
-  fontSize: 12,
-  fontFamily: 'MochiyPopOne',
-  fontWeight: '600',
-  textAlign: 'center',
-},
-});
 
 
