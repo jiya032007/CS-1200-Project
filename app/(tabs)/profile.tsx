@@ -1,32 +1,32 @@
-
 import React from 'react';
-import { StyleSheet, Button } from 'react-native';
-import { ThemedText } from '../../components/themed-text';
-import { ThemedView } from '../../components/themed-view';
+import { StyleSheet, Button, View } from 'react-native';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
 import { signOut } from 'firebase/auth';
-import { auth } from '../../firebase-config'; // Adjust the path as needed
-import { useRouter } from 'expo-router';
+import { auth } from '@/config/firebase';
+import { router } from 'expo-router';
 
 export default function ProfileScreen() {
-  const router = useRouter();
-
-  const handleSignOut = () => {
-    signOut(auth)
-      .then(() => {
-        // Sign-out successful.
-        router.replace('/(auth)'); // Redirect to the login screen
-      })
-      .catch((error) => {
-        // An error happened.
-        console.error('Sign out error', error);
-      });
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.replace('/(auth)/login');
+    } catch (error: any) {
+      console.error('Sign out error:', error.message);
+    }
   };
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title">Profile</ThemedText>
-      {/* Placeholder for profile management */}
-      <Button title="Sign Out" onPress={handleSignOut} />
+      <View style={styles.content}>
+        <ThemedText type="title" style={styles.title}>Profile</ThemedText>
+        <ThemedText style={styles.email}>
+          {auth.currentUser?.email || 'No user logged in'}
+        </ThemedText>
+        <View style={styles.buttonContainer}>
+          <Button title="Sign Out" onPress={handleSignOut} color="#5B9FFF" />
+        </View>
+      </View>
     </ThemedView>
   );
 }
@@ -34,7 +34,20 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#1a1a2e',
+  },
+  content: {
+    padding: 20,
+    paddingTop: 60,
+  },
+  title: {
+    marginBottom: 20,
+  },
+  email: {
+    fontSize: 16,
+    marginBottom: 30,
+  },
+  buttonContainer: {
+    marginTop: 20,
   },
 });

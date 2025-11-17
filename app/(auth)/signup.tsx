@@ -9,32 +9,42 @@ import {
   StatusBar 
 } from 'react-native';
 import { router } from 'expo-router';
-import { resetPassword } from '@/services/authService';
+import { signUp } from '@/services/authService';
 import { generateSessionCode } from '@/utils/sessionCode';
 
-export default function ForgotPasswordScreen() {
+export default function SignupScreen() {
   const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [sessionCode, setSessionCode] = useState<string>('');
 
   useEffect(() => {
     setSessionCode(generateSessionCode());
   }, []);
 
-  const handleResetPassword = async (): Promise<void> => {
-    if (!email) {
-      Alert.alert('Error', 'Please enter your email');
+  const handleSignup = async (): Promise<void> => {
+    if (!email || !password || !confirmPassword) {
+      Alert.alert('Error', 'Please fill all fields');
       return;
     }
 
-    const result = await resetPassword(email);
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters');
+      return;
+    }
+
+    const result = await signUp(email, password);
     if (result.success) {
-      Alert.alert(
-        'Success', 
-        'Password reset email sent! Check your inbox.',
-        [{ text: 'OK', onPress: () => router.back() }]
-      );
+      Alert.alert('Success', 'Account created successfully', [
+        { text: 'OK', onPress: () => router.replace('/(auth)/login') }
+      ]);
     } else {
-      Alert.alert('Error', result.error || 'Reset password failed');
+      Alert.alert('Error', result.error || 'Signup failed');
     }
   };
 
@@ -42,11 +52,11 @@ export default function ForgotPasswordScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       
-      <Text style={styles.title}>forgot password</Text>
+      <Text style={styles.title}>NEW ACCOUNT</Text>
       <Text style={styles.sessionCode}>Session code: {sessionCode}</Text>
 
       <View style={styles.formContainer}>
-        <Text style={styles.label}>Email :</Text>
+        <Text style={styles.label}>Username/gmail</Text>
         <TextInput
           style={styles.input}
           placeholder="Enter your username"
@@ -57,12 +67,28 @@ export default function ForgotPasswordScreen() {
           keyboardType="email-address"
         />
 
-        <TouchableOpacity style={styles.sendButton} onPress={handleResetPassword}>
-          <Text style={styles.sendButtonText}>Send Code on Email</Text>
-        </TouchableOpacity>
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          placeholderTextColor="#6B7FD7"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backToLogin}>back to login</Text>
+        <Text style={styles.label}>Confirm Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Retype your Password"
+          placeholderTextColor="#6B7FD7"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
+
+        <TouchableOpacity style={styles.createButton} onPress={handleSignup}>
+          <Text style={styles.createButtonText}>Create new account</Text>
         </TouchableOpacity>
       </View>
 
@@ -91,7 +117,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 38,
+    fontSize: 40,
     fontWeight: 'bold',
     color: '#5B9FFF',
     textAlign: 'center',
@@ -123,24 +149,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#3a3a6e',
   },
-  sendButton: {
+  createButton: {
     backgroundColor: 'transparent',
     borderWidth: 2,
     borderColor: '#5B9FFF',
     borderRadius: 8,
     padding: 15,
-    marginTop: 10,
+    marginTop: 20,
   },
-  sendButtonText: {
+  createButtonText: {
     color: '#5B9FFF',
     textAlign: 'center',
     fontSize: 16,
-  },
-  backToLogin: {
-    color: '#fff',
-    textAlign: 'center',
-    textDecorationLine: 'underline',
-    marginTop: 20,
+    fontWeight: 'bold',
   },
   bottomNav: {
     position: 'absolute',

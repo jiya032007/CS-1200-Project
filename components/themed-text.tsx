@@ -1,31 +1,27 @@
-import { StyleSheet, Text, type TextProps } from 'react-native';
+import React from 'react';
+import { Text, TextProps, StyleSheet } from 'react-native';
 
-import { useThemeColor } from '@/hooks/use-theme-color';
-
-export type ThemedTextProps = TextProps & {
+export interface ThemedTextProps extends TextProps {
+  type?: 'default' | 'title' | 'link' | 'defaultSemiBold' | 'subtitle';
   lightColor?: string;
   darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
-};
+}
 
-export function ThemedText({
-  style,
+export function ThemedText({ 
+  style, 
+  type = 'default',
   lightColor,
   darkColor,
-  type = 'default',
-  ...rest
+  ...rest 
 }: ThemedTextProps) {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
-
   return (
     <Text
       style={[
-        { color },
-        type === 'default' ? styles.default : undefined,
-        type === 'title' ? styles.title : undefined,
-        type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
-        type === 'subtitle' ? styles.subtitle : undefined,
-        type === 'link' ? styles.link : undefined,
+        styles.default,
+        type === 'title' && styles.title,
+        type === 'defaultSemiBold' && styles.defaultSemiBold,
+        type === 'subtitle' && styles.subtitle,
+        type === 'link' && styles.link,
         style,
       ]}
       {...rest}
@@ -35,26 +31,27 @@ export function ThemedText({
 
 const styles = StyleSheet.create({
   default: {
+    color: '#fff',
     fontSize: 16,
-    lineHeight: 24,
   },
   defaultSemiBold: {
+    color: '#fff',
     fontSize: 16,
-    lineHeight: 24,
     fontWeight: '600',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    lineHeight: 32,
+    color: '#fff',
   },
   subtitle: {
     fontSize: 20,
     fontWeight: 'bold',
+    color: '#fff',
   },
   link: {
-    lineHeight: 30,
+    color: '#5B9FFF',
     fontSize: 16,
-    color: '#0a7ea4',
+    textDecorationLine: 'underline',
   },
 });
