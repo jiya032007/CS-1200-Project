@@ -300,7 +300,7 @@ function MainApp() {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>AI Response:</Text>
             <Text style={styles.dropdownText}>
-              {aiAnswer || 'Waiting for AI response...'}
+              {aiAnswer || 'Ai response should return here'}
             </Text>
           </View>
 
