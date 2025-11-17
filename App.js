@@ -86,12 +86,7 @@ export default function App() {
         </ScrollView>
 
 
-        <View style={styles.tabBar}>
-          <Ionicons name="home-outline" size={24} color="#0077FF" />
-          <Ionicons name="people-outline" size={24} color="#0077FF" />
-          <Ionicons name="notifications-outline" size={24} color="#0077FF" />
-          <Ionicons name="menu-outline" size={24} color="#0077FF" />
-        </View>
+        <TabBar setScreen={setScreen} />
       </SafeAreaView>
     );
   }
@@ -235,12 +230,7 @@ export default function App() {
         </ScrollView>
 
 
-        <View style={styles.tabBar}>
-          <Ionicons name="home-outline" size={24} color="#0077FF" />
-          <Ionicons name="people-outline" size={24} color="#0077FF" />
-          <Ionicons name="notifications-outline" size={24} color="#0077FF" />
-          <Ionicons name="menu-outline" size={24} color="#0077FF" />
-        </View>
+        <TabBar setScreen={setScreen} />
       </SafeAreaView>
     );
   }
@@ -267,12 +257,7 @@ export default function App() {
         </ScrollView>
 
 
-        <View style={styles.tabBar}>
-          <Ionicons name="home-outline" size={24} color="#0077FF" />
-          <Ionicons name="people-outline" size={24} color="#0077FF" />
-          <Ionicons name="notifications-outline" size={24} color="#0077FF" />
-          <Ionicons name="menu-outline" size={24} color="#0077FF" />
-        </View>
+        <TabBar setScreen={setScreen} />
       </SafeAreaView>
     );
   }
@@ -337,18 +322,12 @@ export default function App() {
         </ScrollView>
 
 
-        <View style={styles.tabBar}>
-          <Ionicons name="home-outline" size={24} color="#0077FF" />
-          <Ionicons name="people-outline" size={24} color="#0077FF" />
-          <Ionicons name="notifications-outline" size={24} color="#0077FF" />
-          <Ionicons name="menu-outline" size={24} color="#0077FF" />
-        </View>
+        <TabBar setScreen={setScreen} />
       </SafeAreaView>
     );
   }
 
 
-  // Join screen
   // Join screen
 return (
   <SafeAreaView style={styles.safeArea}>
@@ -389,16 +368,27 @@ return (
       </ScrollView>
     </KeyboardAvoidingView>
 
-    <View style={styles.tabBar}>
-      <Ionicons name="home-outline" size={24} color="#0077FF" />
-      <Ionicons name="people-outline" size={24} color="#0077FF" />
-      <Ionicons name="notifications-outline" size={24} color="#0077FF" />
-      <Ionicons name="menu-outline" size={24} color="#0077FF" />
-    </View>
   </SafeAreaView>
 );
 }
-
+function TabBar({ setScreen }) {
+  return (
+    <View style={styles.tabBar}>
+      <TouchableOpacity onPress={() => setScreen('home')}>
+        <Ionicons name="home-outline" size={24} color="#0077FF" />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => setScreen('people')}>
+        <Ionicons name="people-outline" size={24} color="#0077FF" />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => setScreen('notifications')}>
+        <Ionicons name="notifications-outline" size={24} color="#0077FF" />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => setScreen('menu')}>
+        <Ionicons name="menu-outline" size={24} color="#0077FF" />
+      </TouchableOpacity>
+    </View>
+  );
+}
 
 
 
