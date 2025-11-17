@@ -4,9 +4,10 @@ import Checkbox from 'expo-checkbox';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase-config'; // Adjust the path as needed
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -14,7 +15,34 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [isChecked, setChecked] = useState(false);
 
+  useEffect(() => {
+    const loadCredentials = async () => {
+      try {
+        const storedEmail = await AsyncStorage.getItem('email');
+        const storedPassword = await AsyncStorage.getItem('password');
+        if (storedEmail && storedPassword) {
+          setEmail(storedEmail);
+          setPassword(storedPassword);
+          setChecked(true);
+        }
+      } catch (error) {
+        console.error('Failed to load credentials', error);
+      }
+    };
+    loadCredentials();
+  }, []);
+
   const handleLogin = () => {
+    if (isChecked) {
+      // Store credentials
+      AsyncStorage.setItem('email', email);
+      AsyncStorage.setItem('password', password);
+    } else {
+      // Clear credentials
+      AsyncStorage.removeItem('email');
+      AsyncStorage.removeItem('password');
+    }
+
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in 
