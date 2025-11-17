@@ -1,0 +1,141 @@
+/*************************************************
+ * =============== FRONTEND (Expo RN) ============
+*/
+
+import React, { useState, useEffect } from "react";
+import { StyleSheet, TextInput, Button, ScrollView, View } from "react-native";
+import { ThemedText } from "@/components/themed-text"; 
+import { ThemedView } from "@/components/themed-view";
+
+/* Figma theme colors */
+const Colors = {
+  background: "#02062F",
+  card: "#0B0F4A",
+  border: "#1A1F66",
+  text: "#FFFFFF",
+  neonBlue: "#4AAEFF",
+  neonRed: "#FF4A4A",
+  lightGray: "#D5D5D5",
+};
+
+import ProgressBar from "@/components/ProgressBar";
+
+export default function PollScreen() {
+  const [question, setQuestion] = useState("");
+  const [aiText, setAiText] = useState("");
+  const [results, setResults] = useState<any>(null);
+  const userId = "user_" + Math.floor(Math.random() * 10000);
+
+  const baseUrl = "http://10.0.2.2:3000";
+
+  async function askAI() {
+    if (!question.trim()) return;
+
+    const res = await fetch(`${baseUrl}/ask-ai`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question }),
+    });
+    const data = await res.json();
+    setAiText(data.summary);
+  }
+
+  async function vote(type: "support" | "dont") {
+    const res = await fetch(`${baseUrl}/vote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, vote: type }),
+    });
+
+    const data = await res.json();
+    setResults(data);
+  }
+
+  useEffect(() => {
+    const id = setInterval(async () => {
+      const res = await fetch(`${baseUrl}/results`);
+      const data = await res.json();
+      setResults(data);
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <ScrollView style={styles.screen}>
+      <ThemedText type="title" style={styles.header}>AI Decision Maker</ThemedText>
+
+      <ThemedText style={styles.label}>Enter a Decision</ThemedText>
+      <TextInput
+        style={styles.input}
+        placeholder="Should school adopt a 4-day schedule?"
+        placeholderTextColor="#999"
+        value={question}
+        onChangeText={setQuestion}
+      />
+
+      <Button title="Ask AI" onPress={askAI} color={Colors.neonBlue} />
+
+      {/* AI box */}
+      {aiText !== "" && (
+        <View style={styles.card}>
+          <ThemedText type="subtitle" style={styles.cardTitle}>AI Suggestion</ThemedText>
+          <ThemedText style={styles.cardText}>{aiText}</ThemedText>
+        </View>
+      )}
+
+      {/* Voting */}
+      {aiText !== "" && (
+        <>
+          <ThemedText type="subtitle" style={styles.section}>Cast your vote</ThemedText>
+
+          <Button title="Support" onPress={() => vote("support")} color={Colors.neonBlue} />
+          <Button title="Don’t Support" onPress={() => vote("dont")} color={Colors.neonRed} />
+
+          {results && (
+            <View style={styles.card}>
+              <ThemedText type="subtitle" style={styles.cardTitle}>Live Results</ThemedText>
+
+              <ThemedText>Support — {results.supportPct}%</ThemedText>
+              <ProgressBar pct={results.supportPct} color={Colors.neonBlue} />
+
+              <ThemedText>Don’t Support — {results.dontPct}%</ThemedText>
+              <ProgressBar pct={results.dontPct} color={Colors.neonRed} />
+
+              <ThemedText style={styles.smallText}>
+                {results.total} votes • Updates in real-time • One vote per user
+              </ThemedText>
+            </View>
+          )}
+        </>
+      )}
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: { backgroundColor: Colors.background, padding: 18 },
+  header: { color: Colors.neonBlue, textAlign: "center", marginBottom: 20 },
+  label: { color: Colors.lightGray, marginBottom: 8 },
+  input: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 10,
+    padding: 12,
+    color: "#FFF",
+    marginBottom: 20,
+    backgroundColor: "#05094A",
+  },
+  card: {
+    backgroundColor: Colors.card,
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  cardTitle: { color: Colors.lightGray, marginBottom: 10 },
+  cardText: { color: Colors.text },
+  section: { color: Colors.lightGray, marginTop: 30, marginBottom: 10 },
+  smallText: { color: Colors.lightGray, marginTop: 10, fontSize: 12 },
+});
