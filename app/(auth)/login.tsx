@@ -33,7 +33,23 @@ export default function LoginScreen() {
       Alert.alert('Success', 'Logged in successfully');
       router.replace('/(tabs)');
     } else {
-      Alert.alert('Error', result.error || 'Login failed');
+      let errorMessage = 'Login failed. Please try again.';
+      if (result.error) {
+        switch (result.error) {
+          case 'auth/user-not-found':
+          case 'auth/invalid-email':
+            errorMessage = 'No account found with this email address.';
+            break;
+          case 'auth/wrong-password':
+          case 'auth/invalid-credential':
+            errorMessage = 'Incorrect password. Please try again.';
+            break;
+          default:
+            errorMessage = result.error;
+            break;
+        }
+      }
+      Alert.alert('Error', errorMessage);
     }
   };
 

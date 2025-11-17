@@ -1,7 +1,22 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+
+import { Tabs, useRouter } from 'expo-router';
+import React, { useEffect } from 'react';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from '@/config/firebase';
 
 export default function TabLayout() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
+      if (!user) {
+        router.replace('/(auth)/login');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
   return (
     <Tabs
       screenOptions={{

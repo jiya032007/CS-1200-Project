@@ -40,11 +40,27 @@ export default function SignupScreen() {
 
     const result = await signUp(email, password);
     if (result.success) {
-      Alert.alert('Success', 'Account created successfully', [
-        { text: 'OK', onPress: () => router.replace('/(auth)/login') }
-      ]);
+      // Redirect to home page on successful signup
+      router.replace('/(tabs)');
     } else {
-      Alert.alert('Error', result.error || 'Signup failed');
+      let errorMessage = 'Signup failed. Please try again.';
+      if (result.error) {
+        switch (result.error) {
+          case 'auth/email-already-in-use':
+            errorMessage = 'This email address is already in use. Please use a different email.';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = 'The email address is not valid.';
+            break;
+          case 'auth/weak-password':
+            errorMessage = 'The password is too weak. Please choose a stronger password.';
+            break;
+          default:
+            errorMessage = result.error;
+            break;
+        }
+      }
+      Alert.alert('Error', errorMessage);
     }
   };
 
@@ -52,6 +68,10 @@ export default function SignupScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
       
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>{'<' + ' Back'}</Text>
+      </TouchableOpacity>
+
       <Text style={styles.title}>NEW ACCOUNT</Text>
       <Text style={styles.sessionCode}>Session code: {sessionCode}</Text>
 
@@ -93,7 +113,7 @@ export default function SignupScreen() {
       </View>
 
       <View style={styles.bottomNav}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
           <Text style={styles.navIcon}>🏠</Text>
         </TouchableOpacity>
         <TouchableOpacity>
@@ -115,6 +135,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1a1a2e',
     padding: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 60,
+    left: 20,
+    zIndex: 1,
+  },
+  backButtonText: {
+    color: '#5B9FFF',
+    fontSize: 16,
   },
   title: {
     fontSize: 40,

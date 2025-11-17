@@ -1,33 +1,42 @@
-import React from 'react';
-import { StyleSheet, Button, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, ScrollView, Pressable } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { signOut } from 'firebase/auth';
+import { Link } from 'expo-router';
 import { auth } from '@/config/firebase';
-import { router } from 'expo-router';
+import { onAuthStateChanged, User } from 'firebase/auth';
 
 export default function ProfileScreen() {
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      router.replace('/(auth)/login');
-    } catch (error: any) {
-      console.error('Sign out error:', error.message);
-    }
-  };
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.content}>
+    <ScrollView style={styles.container}>
+      <ThemedView style={styles.content}>
         <ThemedText type="title" style={styles.title}>Profile</ThemedText>
-        <ThemedText style={styles.email}>
-          {auth.currentUser?.email || 'No user logged in'}
-        </ThemedText>
-        <View style={styles.buttonContainer}>
-          <Button title="Sign Out" onPress={handleSignOut} color="#5B9FFF" />
-        </View>
-      </View>
-    </ThemedView>
+
+        {user && (
+          <ThemedView style={styles.row}>
+            <ThemedText style={styles.rowLabel}>Email</ThemedText>
+            <ThemedText style={styles.rowValue}>{user.email}</ThemedText>
+          </ThemedView>
+        )}
+
+        <Link href="/settings" asChild>
+          <Pressable style={styles.row}>
+            <ThemedText style={styles.rowLabel}>Settings</ThemedText>
+            <ThemedText style={styles.rowValue}>〉</ThemedText>
+          </Pressable>
+        </Link>
+
+      </ThemedView>
+    </ScrollView>
   );
 }
 
@@ -41,13 +50,26 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   title: {
-    marginBottom: 20,
-  },
-  email: {
-    fontSize: 16,
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center',
     marginBottom: 30,
+    color: '#E6F4FE',
   },
-  buttonContainer: {
-    marginTop: 20,
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#334155',
+  },
+  rowLabel: {
+    color: '#ffffff',
+    fontSize: 16,
+  },
+  rowValue: {
+    color: '#a9a9a9',
+    fontSize: 16,
   },
 });
