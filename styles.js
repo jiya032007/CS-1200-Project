@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
 },
 subTitle: {
   fontFamily: 'MoiraiOne',
-  fontSize: 45,
+  fontSize: 46,
   fontWeight: '600',
   color: '#2A6AFF',
   textAlign: 'center',
