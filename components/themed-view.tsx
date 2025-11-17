@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, ViewProps, StyleSheet } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 
 export interface ThemedViewProps extends ViewProps {
   lightColor?: string;
@@ -12,11 +13,12 @@ export function ThemedView({
   darkColor,
   ...rest 
 }: ThemedViewProps) {
-  return <View style={[styles.default, style]} {...rest} />;
+  const { theme } = useTheme();
+  return <View style={[{ backgroundColor: theme.backgroundColor }, styles.default, style]} {...rest} />;
 }
 
 const styles = StyleSheet.create({
   default: {
-    backgroundColor: '#1a1a2e',
+    flex: 1,
   },
 });

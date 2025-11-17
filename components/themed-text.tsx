@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, TextProps, StyleSheet } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 
 export interface ThemedTextProps extends TextProps {
   type?: 'default' | 'title' | 'link' | 'defaultSemiBold' | 'subtitle';
@@ -14,14 +15,17 @@ export function ThemedText({
   darkColor,
   ...rest 
 }: ThemedTextProps) {
+  const { theme } = useTheme();
+
   return (
     <Text
       style={[
         styles.default,
+        { color: theme.textColor },
         type === 'title' && styles.title,
         type === 'defaultSemiBold' && styles.defaultSemiBold,
         type === 'subtitle' && styles.subtitle,
-        type === 'link' && styles.link,
+        type === 'link' && { color: theme.primary, textDecorationLine: 'underline' },
         style,
       ]}
       {...rest}

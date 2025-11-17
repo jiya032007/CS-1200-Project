@@ -232,6 +232,46 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
+  participantBubble: {
+  backgroundColor: '#A1CAFF',   // light background for participant cards
+  padding: 12,
+  borderRadius: 12,
+  marginVertical: 6,
+  shadowColor: '#000',
+  shadowOpacity: 0.1,
+  shadowRadius: 3,
+  elevation: 2,                 // Android shadow
+},
+subTitle: {
+  fontFamily: 'MoiraiOne',
+  fontSize: 45,        // smaller than your main title
+  fontWeight: '600',
+  color: '#2A6AFF',
+  textAlign: 'center',
+  marginBottom: 10,
+},
+participantText: {
+  fontSize: 12,
+  color: '#001B58',
+  fontFamily: 'MochiyPopOne',
+  fontWeight: '500',
+},
+  notificationBubble: {
+  backgroundColor: '#A1CAFF',   // light blue bubble
+  padding: 12,
+  borderRadius: 12,
+  marginVertical: 6,
+  shadowColor: '#000',
+  shadowOpacity: 0.1,
+  shadowRadius: 3,
+  elevation: 2,                 // Android shadow
+},
+
+notificationText: {
+  fontSize: 12,
+  fontFamily: 'MochiyPopOne',
+  color: '#001B58',
+}
 });
 
 export default styles;

@@ -12,11 +12,23 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Modal,
 } from 'react-native';
 import styles from './styles';
+import React from 'react';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 
 export default function App() {
+  return (
+    <ThemeProvider>
+      <MainApp />
+    </ThemeProvider>
+  );
+}
+
+function MainApp() {
+  const { theme, setThemeName } = useTheme();
   const [fontsLoaded] = useFonts({
     MoiraiOne: require('./assets/fonts/MoiraiOne-Regular.ttf'),
     MochiyPopOne: require('./assets/fonts/MochiyPopOne-Regular.ttf'),
@@ -25,6 +37,7 @@ export default function App() {
 
   const [joinCode, setJoinCode] = useState('');
   const [screen, setScreen] = useState('join'); // 'join' | 'waiting' | 'home' | 'aiWaiting' | 'aiResponse'
+  const [themeModalVisible, setThemeModalVisible] = useState(false);
 
 
   const [customQuestion, setCustomQuestion] = useState('');
@@ -101,7 +114,7 @@ export default function App() {
           <View style={styles.headerWrap}>
             <View style={styles.titleContainer}>
               <View style={{ position: 'relative' }}>
-                <Text style={[styles.title, styles.titleOutline]}>AI Decision Maker</Text>
+<Text style={[styles.subTitle, styles.titleOutline]}>Home</Text>
               </View>
             </View>
             <Text style={styles.sessionCode}>Session Code: {joinCode}</Text>
@@ -326,7 +339,138 @@ export default function App() {
       </SafeAreaView>
     );
   }
+  // People screen
+if (screen === 'people') {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle={theme.statusBarStyle} backgroundColor={theme.primary} />
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.headerWrap}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.subTitle}>Participants</Text>
+          </View>
+        </View>
 
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>People in Session:</Text>
+
+          {/* Bubble participants */}
+          <View style={styles.participantBubble}>
+            <Text style={styles.participantText}>Alice</Text>
+          </View>
+          <View style={styles.participantBubble}>
+            <Text style={styles.participantText}>Bob</Text>
+          </View>
+          <View style={styles.participantBubble}>
+            <Text style={styles.participantText}>Charlie</Text>
+          </View>
+        </View>
+      </ScrollView>
+
+      <TabBar setScreen={setScreen} />
+    </SafeAreaView>
+  );
+}
+
+// Notifications screen
+if (screen === 'notifications') {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor="#001B58" />
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.headerWrap}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.subTitle}>Notifications</Text>
+          </View>
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Recent Notifications:</Text>
+
+          {/* Bubble notifications */}
+          <View style={styles.notificationBubble}>
+            <Text style={styles.notificationText}>Alice asked a question</Text>
+          </View>
+          <View style={styles.notificationBubble}>
+            <Text style={styles.notificationText}>Bob submitted a response</Text>
+          </View>
+          <View style={styles.notificationBubble}>
+            <Text style={styles.notificationText}>Session will end in 10 minutes</Text>
+          </View>
+        </View>
+      </ScrollView>
+
+      <TabBar setScreen={setScreen} />
+    </SafeAreaView>
+  );
+}
+// Menu (Settings) screen
+if (screen === 'menu') {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor="#001B58" />
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.headerWrap}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.subTitle}>Settings</Text>
+          </View>
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Options:</Text>
+          <TouchableOpacity style={styles.dropdownItem} onPress={() => setThemeModalVisible(true)}>
+            <Text style={styles.dropdownText}>Change Theme</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.dropdownItem}>
+            <Text style={styles.dropdownText}>Manage Account</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.dropdownItem}>
+            <Text style={styles.dropdownText}>Privacy Settings</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      <TabBar setScreen={setScreen} />
+
+      <Modal
+        visible={themeModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setThemeModalVisible(false)}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.4)' }}>
+          <View style={{ width: '80%', borderRadius: 8, padding: 16, backgroundColor: theme.backgroundColor }}>
+            <Text style={{ color: theme.textColor, fontSize: 18, marginBottom: 12 }}>Choose a Theme</Text>
+            <TouchableOpacity
+              style={{ paddingVertical: 10 }}
+              onPress={async () => { await setThemeName('default'); setThemeModalVisible(false); }}
+            >
+              <Text style={{ color: theme.textColor }}>Default</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ paddingVertical: 10 }}
+              onPress={async () => { await setThemeName('blue'); setThemeModalVisible(false); }}
+            >
+              <Text style={{ color: theme.textColor }}>Blue</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ paddingVertical: 10 }}
+              onPress={async () => { await setThemeName('green'); setThemeModalVisible(false); }}
+            >
+              <Text style={{ color: theme.textColor }}>Green</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ paddingVertical: 8, marginTop: 8 }}
+              onPress={() => setThemeModalVisible(false)}
+            >
+              <Text style={{ color: theme.textColor, textAlign: 'right' }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
+  );
+}
 
   // Join screen
 return (
