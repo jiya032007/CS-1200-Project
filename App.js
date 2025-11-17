@@ -223,8 +223,8 @@ function MainApp() {
 
 
                 const aiText = Array.isArray(data)
-                  ? data[0]?.generated_text
-                  : data?.generated_text || 'No answer returned.';
+                  ? data[0]?.generated_text || 'This is where AI response would be'
+                  : data?.generated_text || 'This is where AI response would be';
 
 
                 setAiAnswer(aiText);
@@ -232,7 +232,7 @@ function MainApp() {
                 setScreen('aiResponse');
               } catch (error) {
                 console.error('AI error:', error);
-                setAiAnswer("Sorry, I couldn't fetch an AI answer.");
+                setAiAnswer('This is where AI response would be');
                 setScreen('aiResponse');
               }
             }}
@@ -300,7 +300,7 @@ function MainApp() {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>AI Response:</Text>
             <Text style={styles.dropdownText}>
-              {aiAnswer || 'Ai response should return here'}
+              {aiAnswer || 'This is where AI response would be'}
             </Text>
           </View>
 
