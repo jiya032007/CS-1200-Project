@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -12,11 +13,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Modal,
 } from 'react-native';
-import styles from './styles';
-import React from 'react';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import styles from './styles';
 
 
 export default function App() {
