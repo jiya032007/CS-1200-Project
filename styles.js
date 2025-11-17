@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 20,
     fontSize: 16,
-    color: '#A1CAFF',
+    color: '#0040ff',
     fontWeight: '600',
     alignSelf: 'center',
     fontFamily: 'MochiyPopOne',
